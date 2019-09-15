@@ -1,0 +1,27 @@
+import { Model, Sequelize } from 'sequelize';
+import bcrypt from 'bcrypt';
+
+class User extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        password: Sequelize.VIRTUAL,
+        password_hash: Sequelize.STRING,
+      },
+      { sequelize }
+    );
+
+    this.addHook('beforeSave', async user => {
+      if (user.password) {
+        const salt = await bcrypt.genSalt(10);
+        user.password_hash = await bcrypt.hash(user.password, salt);
+      }
+    });
+
+    return this;
+  }
+}
+
+export default User;
