@@ -9,6 +9,7 @@ import FileController from './app/controllers/FileController';
 import MeetupController from './app/controllers/MeetupController';
 import OrganizationController from './app/controllers/OrganizationController';
 import SessionController from './app/controllers/SessionController';
+import SubscriptionController from './app/controllers/SubscriptionController';
 import UserController from './app/controllers/UserController';
 
 const routes = new Router();
@@ -23,8 +24,9 @@ routes.post('/files', upload.single('file'), FileController.store);
 routes.delete('/meetups/:id', MeetupController.delete);
 routes.get('/meetups', MeetupController.index);
 routes.post('/meetups', MeetupController.store);
-routes.get('/meetups/organization', OrganizationController.index);
 routes.put('/meetups/:id', MeetupController.update);
+routes.get('/meetups/organization', OrganizationController.index);
+routes.post('/meetups/:id/subscription', SubscriptionController.store);
 routes.put('/users', UserController.update);
 
 export default routes;

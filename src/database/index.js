@@ -4,9 +4,10 @@ import databaseConfig from '../config/database';
 
 import File from '../app/models/File';
 import Meetup from '../app/models/Meetup';
+import Subscription from '../app/models/Subscription';
 import User from '../app/models/User';
 
-const models = [File, Meetup, User];
+const models = [File, Meetup, Subscription, User];
 
 class Database {
   constructor() {
