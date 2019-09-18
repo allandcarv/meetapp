@@ -54,9 +54,19 @@ class MeetupController {
 
     req.body.user_id = req.userId;
 
-    const meetup = await Meetup.create(req.body);
+    const {
+      id,
+      name,
+      description,
+      localization,
+      date,
+      banner_id,
+      user_id,
+    } = await Meetup.create(req.body);
 
-    return res.status(201).json(meetup);
+    return res
+      .status(201)
+      .json({ id, name, description, localization, date, banner_id, user_id });
   }
 
   async update(req, res) {
@@ -89,9 +99,19 @@ class MeetupController {
         .json({ error: 'You are not the organizer of this meetup. ' });
     }
 
-    const newMeetup = await meetup.update(req.body);
+    const {
+      id,
+      name,
+      description,
+      localization,
+      date,
+      banner_id,
+      user_id,
+    } = await meetup.update(req.body);
 
-    return res.status(200).json(newMeetup);
+    return res
+      .status(200)
+      .json({ id, name, description, localization, date, banner_id, user_id });
   }
 }
 
