@@ -40,7 +40,7 @@ class MeetupController {
       description: Yup.string().required(),
       localization: Yup.string().required(),
       date: Yup.date().required(),
-      banner_id: Yup.string().required(),
+      banner_id: Yup.number().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -49,14 +49,49 @@ class MeetupController {
 
     const parsedDate = parseISO(req.body.date);
     if (isBefore(parsedDate, new Date())) {
-      return res.status(400).json({ error: 'Past dates are not available. ' });
+      return res.status(400).json({ error: 'Past dates are not permitted. ' });
     }
 
     req.body.user_id = req.userId;
 
     const meetup = await Meetup.create(req.body);
 
-    return res.json(meetup);
+    return res.status(201).json(meetup);
+  }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      description: Yup.string(),
+      localization: Yup.string(),
+      date: Yup.date(),
+      banner_id: Yup.number(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Data Input Validation Failed. ' });
+    }
+
+    if (req.body.date) {
+      const parsedDate = parseISO(req.body.date);
+      if (isBefore(parsedDate, new Date())) {
+        return res
+          .status(400)
+          .json({ error: 'Past dates are not permitted. ' });
+      }
+    }
+
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    if (req.userId !== meetup.user_id) {
+      return res
+        .status(401)
+        .json({ error: 'You are not the organizer of this meetup. ' });
+    }
+
+    const newMeetup = await meetup.update(req.body);
+
+    return res.status(200).json(newMeetup);
   }
 }
 
