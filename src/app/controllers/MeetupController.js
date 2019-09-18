@@ -121,6 +121,10 @@ class MeetupController {
         .json({ error: 'You are not the organizer of this meetup. ' });
     }
 
+    if (meetup.past) {
+      return res.status(401).json({ error: 'You cannot edit past Meetups.' });
+    }
+
     const {
       id,
       name,
