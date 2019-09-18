@@ -1,8 +1,16 @@
-import { startOfHour } from 'date-fns';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 
 class SubscriptionController {
+  async index(req, res) {
+    const subscriptions = await Subscription.findAll({
+      where: { user_id: req.userId },
+      include: [Meetup],
+    });
+
+    return res.status(200).json(subscriptions);
+  }
+
   async store(req, res) {
     const meetup = await Meetup.findByPk(req.params.id);
 

@@ -26,6 +26,7 @@ routes.get('/meetups', MeetupController.index);
 routes.post('/meetups', MeetupController.store);
 routes.put('/meetups/:id', MeetupController.update);
 routes.get('/meetups/organization', OrganizationController.index);
+routes.get('/meetups/subscriptions', SubscriptionController.index);
 routes.post('/meetups/:id/subscription', SubscriptionController.store);
 routes.put('/users', UserController.update);
 
