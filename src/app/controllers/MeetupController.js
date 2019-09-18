@@ -6,6 +6,28 @@ import Meetup from '../models/Meetup';
 import User from '../models/User';
 
 class MeetupController {
+  async delete(req, res) {
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    if (!meetup) {
+      return res.status(404).json({ error: 'Meetup not found. ' });
+    }
+
+    if (meetup.past) {
+      return res.status(401).json({ error: 'You cannot delete past Meetups' });
+    }
+
+    if (meetup.user_id !== req.userId) {
+      return res
+        .status(401)
+        .json({ error: 'You are not the organizer of this Meetup.' });
+    }
+
+    await meetup.destroy();
+
+    return res.status(204).send();
+  }
+
   async index(req, res) {
     const { page = 1 } = req.query;
 
