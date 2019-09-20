@@ -1,7 +1,8 @@
-import Mail from '../lib/Mail';
 import Meetup from '../models/Meetup';
 import File from '../models/File';
+import Queue from '../lib/Queue';
 import Subscription from '../models/Subscription';
+import SubscriptionMail from '../jobs/SubscriptionMail';
 import User from '../models/User';
 
 class SubscriptionController {
@@ -91,16 +92,7 @@ class SubscriptionController {
       attributes: ['name'],
     });
 
-    await Mail.sendMail({
-      to: `${meetup.organizer.name} <${meetup.organizer.email}>`,
-      subject: `Nova inscrição em ${meetup.name}`,
-      template: 'subscription',
-      context: {
-        organizer: meetup.organizer.name,
-        user: user.name,
-        meetup: meetup.name,
-      },
-    });
+    await Queue.add(SubscriptionMail.key, { meetup, user });
 
     return res.status(201).json(subscription);
   }
