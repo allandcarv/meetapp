@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+
 import Meetup from '../models/Meetup';
 import File from '../models/File';
 import Queue from '../lib/Queue';
@@ -12,7 +14,12 @@ class SubscriptionController {
       include: [
         {
           model: Meetup,
-          attributes: ['past', 'name', 'description', 'localization', 'date'],
+          where: {
+            date: {
+              [Op.gt]: new Date(),
+            },
+          },
+          attributes: ['name', 'description', 'localization', 'date'],
           include: [
             {
               model: User,
@@ -28,6 +35,7 @@ class SubscriptionController {
         },
       ],
       attributes: ['id'],
+      order: [[Meetup, 'updated_at', 'ASC']],
     });
 
     return res.status(200).json(subscriptions);
