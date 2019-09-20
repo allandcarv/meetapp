@@ -1,3 +1,4 @@
+import Mail from '../lib/Mail';
 import Meetup from '../models/Meetup';
 import File from '../models/File';
 import Subscription from '../models/Subscription';
@@ -32,22 +33,18 @@ class SubscriptionController {
   }
 
   async store(req, res) {
-    const meetup = await Meetup.findByPk(req.params.id);
-
     const checkSubscription = await Subscription.findOne({
       where: { meetup_id: req.params.id },
     });
 
-    const checkDate = await Subscription.findOne({
-      where: { user_id: req.userId },
-      include: {
-        model: Meetup,
-        required: true,
-        where: {
-          date: meetup.date,
-        },
-        attributes: ['id'],
-      },
+    if (checkSubscription) {
+      return res
+        .status(401)
+        .json({ error: 'You have already subscribed to this Meetup.' });
+    }
+
+    const meetup = await Meetup.findByPk(req.params.id, {
+      include: [{ model: User, as: 'organizer' }],
     });
 
     if (!meetup) {
@@ -66,11 +63,17 @@ class SubscriptionController {
         .json({ error: 'You cannot subscribe to past Meetups. ' });
     }
 
-    if (checkSubscription) {
-      return res
-        .status(401)
-        .json({ error: 'You have already subscribed to this Meetup.' });
-    }
+    const checkDate = await Subscription.findOne({
+      where: { user_id: req.userId },
+      include: {
+        model: Meetup,
+        required: true,
+        where: {
+          date: meetup.date,
+        },
+        attributes: ['id'],
+      },
+    });
 
     if (checkDate) {
       return res.status(401).json({
@@ -82,6 +85,21 @@ class SubscriptionController {
     const subscription = await Subscription.create({
       user_id: req.userId,
       meetup_id: req.params.id,
+    });
+
+    const user = await User.findByPk(req.userId, {
+      attributes: ['name'],
+    });
+
+    await Mail.sendMail({
+      to: `${meetup.organizer.name} <${meetup.organizer.email}>`,
+      subject: `Nova inscrição em ${meetup.name}`,
+      template: 'subscription',
+      context: {
+        organizer: meetup.organizer.name,
+        user: user.name,
+        meetup: meetup.name,
+      },
     });
 
     return res.status(201).json(subscription);
